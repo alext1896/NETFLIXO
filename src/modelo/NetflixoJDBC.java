@@ -7,10 +7,19 @@ import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Statement;
 
-import aad.util.Utilidades;
+import utilidades.Utilidades;
 
 public class NetflixoJDBC {
-	public void verTabla() {
+	
+	// Consultas a realizar en BD
+	private static final String SELECT_CAFES_QUERY = "select CAF_NOMBRE, PROV_ID, PRECIO, VENTAS, TOTAL from CAFES";
+	// En una consulta parametrizada ponemos interrogaciones en los valores que aun desconocemos
+	private static final String UPDATE_VENTAS_CAFE = "update CAFES set VENTAS = ? where CAF_NOMBRE = ?";
+	
+	
+	public void verTabla() throws IOException {
+
+		
 		/* Conexion a la Base de Datos */
 		Connection con = null;
 		/* Sentencia sql */
@@ -35,10 +44,6 @@ public class NetflixoJDBC {
 				int total = rs.getInt("TOTAL");
 				System.out.println(coffeeName + ", " + supplierID + ", "+ PRECIO + ", " + VENTAS + ", " + total);
 			}
-		} catch (IOException e) {
-			// Error al leer propiedades
-			// En una aplicacion real, escribo en el log y delego
-			System.err.println(e.getMessage());
 		} catch (SQLException sqle) {
 			// En una aplicacion real, escribo en el log y delego
 			System.err.println(sqle.getMessage());
@@ -68,7 +73,7 @@ public class NetflixoJDBC {
 	 * @param cafe
 	 * @param ventas
 	 */
-	public void actualizarVentasCafe(String cafe, int ventas) {
+	public void actualizarVentasCafe(String cafe, int ventas) throws IOException {
 
 		/* Conexi�n a la Base de Datos */
 		Connection con = null;
@@ -92,11 +97,6 @@ public class NetflixoJDBC {
 			stmt.executeUpdate();
 			
 
-		} catch (IOException e) {
-			// Error al leer propiedades
-			// En una aplicacion real, escribo en el log y delego
-			System.err.println(e.getMessage());
-			
 		} catch (SQLException sqle) {
 			// En una aplicacion real, escribo en el log y delego
 			System.err.println(sqle.getMessage());
