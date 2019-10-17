@@ -37,6 +37,7 @@ public class Utilidades {
 					+ this.dbName + ";create=true", connectionProps);
 		}
 		System.out.println("Connectado a BD");
+		System.out.println("-------------------------------------------------------------");
 		return conn;
 	}
 	
