@@ -9,14 +9,10 @@ public class MainNetflixo {
 
 	public static void main(String[] args) throws IOException {
 		Scanner sc = new Scanner (System.in);
-		// TODO Auto-generated method stub
 		
-		SerieJDBC series = new SerieJDBC ();
+		SerieJDBC serie1 = new SerieJDBC ();
 		
-		System.out.println("numero de genero");
-		int genero = sc.nextInt();
-		
-		series.obtenerSeriesPorGenero(genero, 0, 5);
+		System.out.println(serie1.obtenerSerie(1).toString());
 	}
 
 }

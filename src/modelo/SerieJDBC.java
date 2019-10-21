@@ -2,6 +2,7 @@ package modelo;
 
 import java.io.IOException;
 import java.sql.Connection;
+import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Statement;
@@ -13,6 +14,9 @@ import utilidades.Utilidades;
 public class SerieJDBC {
 	private long idSerie , idGenero;
 	private String nombreSerie, descripcionSerie;
+	private static final String UPDATE_SERIE = "update series set nombre = ?, descripcion = ?, idGenero = ? where idSerie = ?";
+	private static final String SELECT_SERIE_IDSERIE = "select * from series where idSerie = ?";
+	private static final String CREAR_SERIE = "insert into series values ( ?, ?, ?, ?)";
 	
 	public SerieJDBC(long idSerie, String nombreSerie, String descripcionSerie, long idGenero) {
 		this.idSerie = idSerie;
@@ -25,23 +29,25 @@ public class SerieJDBC {
 
 	}
 
-	SerieJDBC obtenerSerie (long idSerie) throws IOException {
+	public SerieJDBC obtenerSerie (long idSerie) throws IOException {
 		/* Conexion a la Base de Datos */
 		Connection con = null;
 		/* Sentencia sql */
-		Statement stmt = null;
+		PreparedStatement stmt = null;
 		/* Conjunto de Resultados a obtener de la sentencia sql */
 		ResultSet rs = null;
 		SerieJDBC serie = null;
-		String query = "SELECT * FROM series WHERE idSerie = " + idSerie;
+		
+		
 		try {
 			con = new Utilidades().getConnection();
 			// Creacion de la sentencia
-			stmt = con.createStatement();
-			// Ejecucion de la consulta y obtencion de resultados en un
-			// ResultSet
-			rs = stmt.executeQuery(query);
+			stmt = con.prepareStatement(SELECT_SERIE_IDSERIE);
+			// Ejecucion de la consulta y obtencion de resultados en un ResultSet
 			
+			stmt.setLong(1, idSerie);
+			
+			rs = stmt.executeQuery();
 			
 			// Recuperacion de los datos del ResultSet
 			while (rs.next() == true) {
@@ -83,21 +89,25 @@ public class SerieJDBC {
 		/* Conexion a la Base de Datos */
 		Connection con = null;
 		/* Sentencia sql */
-		Statement stmt = null;
+		PreparedStatement stmt = null;
 		/* Conjunto de Resultados a obtener de la sentencia sql */
 		ResultSet rs = null;
 		
 		SerieJDBC serie = null;
-		String query = "insert into series values ('" +nombreSerie + "', " + idGenero + ", '"+ descripcionSerie +"', " + idGenero + ")";
+		
+
 		
 		try {
-			
 			con = new Utilidades().getConnection();
 			// Creacion de la sentencia
-			stmt = con.createStatement();
+			stmt = con.prepareStatement(CREAR_SERIE);
+			
+			stmt.setString(2 , nombreSerie );
+			stmt.setString(3, descripcionSerie);
+			stmt.setLong(4, idGenero);
 			// Ejecucion de la consulta y obtencion de resultados en un
 			// ResultSet
-			stmt.execute(query);
+			stmt.executeQuery();
 			
 			serie = new SerieJDBC (idSerie, nombreSerie,  descripcionSerie, idGenero);
 			
@@ -280,7 +290,7 @@ public class SerieJDBC {
 	}
 	
 	/*NO ENTIENDO COMO SACAR LAS SERIES POR NOMBRE, PORQUE NO SE DEBERIAN DE REPETIR LOS NOMBRES DE LAS PELICULAS
-	 * EN TODO CASO, SE MOSTRARIAN LAS PELICULAS QUE CONTENGAN LA PALABRA CLAVE INTRODUCIDA. POR EJEMPLO:
+	 * En Todo CASO, SE MOSTRARIAN LAS PELICULAS QUE CONTENGAN LA PALABRA CLAVE INTRODUCIDA. POR EJEMPLO
 	 * SE INTRODUCE JOKER, PUES MOSTRAR JOKER, JOKER 2, JOKER 3
 	 * PREGUNTAR AL PROFESOR... XDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDD
 	 */
@@ -405,24 +415,22 @@ public class SerieJDBC {
 		/* Conexion a la Base de Datos */
 		Connection con = null;
 		/* Sentencia sql */
-		Statement stmt = null;
+		PreparedStatement stmt = null;
 		/* Conjunto de Resultados a obtener de la sentencia sql */
-		int rs;
-		SerieJDBC serieEditado= serie;
-		String query = "UPDATE series SET idSerie = " + serieEditado.getIdSerie() + ", nombre = '" + serieEditado.getNombreSerie() + 
-				"', descripcion = '" + serieEditado.getDescripcionSerie() + "', idGenero = " + serieEditado.getIdGenero() + ";";
+		
+		
 		try {
 			con = new Utilidades().getConnection();
 			// Creacion de la sentencia
-			stmt = con.createStatement();
+			stmt = con.prepareStatement(UPDATE_SERIE);
 			// Ejecucion de la consulta y obtencion de resultados en un
 			// ResultSet
-			rs = stmt.executeUpdate(query);
+			stmt.setString(1, serie.getNombreSerie());
+			stmt.setString(2, serie.getDescripcionSerie());
+			stmt.setLong(3, serie.getIdGenero());
+			stmt.setLong(4, serie.getIdSerie());
 			
-			while (rs > 0) {
-				return serieEditado;
-			}
-			return null;
+			stmt.executeUpdate();
 
 		}catch (SQLException sqle) {
 			// En una aplicacion real, escribo en el log y delego
