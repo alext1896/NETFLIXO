@@ -1,8 +1,13 @@
 package utilidades;
 
+import java.io.FileNotFoundException;
+import java.io.IOException;
+import java.nio.file.Files;
+import java.nio.file.Paths;
 import java.sql.Connection;
 import java.sql.DriverManager;
 import java.sql.SQLException;
+import java.util.InvalidPropertiesFormatException;
 import java.util.Properties;
 
 public class Utilidades {
@@ -11,6 +16,33 @@ public class Utilidades {
 	public String userName = "alex";
 	public String password = "Mercedes1896.";
 	public String urlString;
+	private static final String PROPERTIES_FILE="/datos/usuarios/alumnos/jose.guapache/Escritorio/AccesoDatos/transparencias/jdbc/mysql-properties.xml";
+	private Properties prop;
+	private String driver;
+	private String serverName;
+	private int portNumber;
+	
+	public Utilidades()
+			throws FileNotFoundException, IOException,
+			InvalidPropertiesFormatException {
+		super();
+		this.setProperties(PROPERTIES_FILE);
+	}
+	
+	private void setProperties(String fileName) throws IOException, InvalidPropertiesFormatException {
+		this.prop = new Properties();
+	    prop.loadFromXML(Files.newInputStream(Paths.get(fileName)));
+
+		this.dbms = this.prop.getProperty("dbms");
+		this.driver = this.prop.getProperty("driver");
+		this.dbName = this.prop.getProperty("database_name");
+		this.userName = this.prop.getProperty("user_name");
+		this.password = this.prop.getProperty("password");
+		this.serverName = this.prop.getProperty("server_name");
+		this.portNumber = Integer
+				.parseInt(this.prop.getProperty("port_number"));
+		
+	}
 	
 	public Connection getConnection() throws SQLException {
 

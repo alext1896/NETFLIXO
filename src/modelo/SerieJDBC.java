@@ -1,5 +1,6 @@
 package modelo;
 
+import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.sql.Connection;
 import java.sql.PreparedStatement;
@@ -7,6 +8,7 @@ import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Statement;
 import java.util.ArrayList;
+import java.util.InvalidPropertiesFormatException;
 
 import utilidades.Utilidades;
 
@@ -14,20 +16,27 @@ import utilidades.Utilidades;
 public class SerieJDBC {
 	private long idSerie , idGenero;
 	private String nombreSerie, descripcionSerie;
-	private static final String UPDATE_SERIE = "update series set nombre = ?, descripcion = ?, idGenero = ? where idSerie = ?";
 	private static final String SELECT_SERIE_IDSERIE = "select * from series where idSerie = ?";
-	private static final String CREAR_SERIE = "insert into series values ( ?, ?, ?, ?)";
+	private static final String CREAR_SERIE = "insert into series (nombre, descripcion, idgenero) values (?, ?, ?)";
+	private static final String UPDATE_SERIE = "update series set nombre = ?, descripcion = ?, idGenero = ? where idSerie = ?";
+	private static final String DELETE_SERIE = "delete from series where idSerie = ?";
+	private static final String SELECT_SERIES = "select * from series";
+	private static final String CONTAR_SERIES = "select count(idSerie) 'numero' from series";
+	private static final String SELECT_SERIES_GENERO = "select * from series where idGenero = ?";
+	private static final String SELECT_SERIES_NOMBRE = "select * from series where nombre like ? limit ?, ?";
 	
+	//CONSTRUCTORES
 	public SerieJDBC(long idSerie, String nombreSerie, String descripcionSerie, long idGenero) {
 		this.idSerie = idSerie;
 		this.nombreSerie = nombreSerie;
 		this.descripcionSerie = descripcionSerie;
 		this.idGenero = idGenero;
 	}
-
 	public SerieJDBC() {
 
 	}
+	
+	//MÉTODOS
 
 	public SerieJDBC obtenerSerie (long idSerie) throws IOException {
 		/* Conexion a la Base de Datos */
@@ -83,36 +92,40 @@ public class SerieJDBC {
 		}
 			return serie = null;
 	}
-
 	
-	public SerieJDBC crearSerie (String nombreSerie, long idGenero, String descripcionSerie) {
-		/* Conexion a la Base de Datos */
-		Connection con = null;
-		/* Sentencia sql */
-		PreparedStatement stmt = null;
-		/* Conjunto de Resultados a obtener de la sentencia sql */
-		ResultSet rs = null;
-		
-		SerieJDBC serie = null;
-		
+	public SerieJDBC crearSerie (String nombreSerie, String descripcionSerie, long idGenero) throws FileNotFoundException, InvalidPropertiesFormatException, IOException {
 
+		Connection con = null;
+		
+		ResultSet rs = null;
+		PreparedStatement stmt = null;
+		SerieJDBC serie = null;
 		
 		try {
 			con = new Utilidades().getConnection();
+			
 			// Creacion de la sentencia
-			stmt = con.prepareStatement(CREAR_SERIE);
+			stmt = con.prepareStatement(CREAR_SERIE,
+                               Statement.RETURN_GENERATED_KEYS);
+			int affectedRows = stmt.executeUpdate();
+			if (affectedRows == 0) {
+			 throw new SQLException("No se pudo guardar");
+			}
 			
-			stmt.setString(2 , nombreSerie );
-			stmt.setString(3, descripcionSerie);
-			stmt.setLong(4, idGenero);
+			ResultSet generatedKeys = stmt.getGeneratedKeys();
+			if (generatedKeys.next()) {
+			  idSerie = generatedKeys.getInt(1);
+			};
+			
+			stmt.setString(1 , nombreSerie );
+			stmt.setString(2, descripcionSerie);
+			stmt.setLong(3, idGenero);
 			// Ejecucion de la consulta y obtencion de resultados en un
-			// ResultSet
-			stmt.executeQuery();
+			stmt.executeUpdate();
 			
-			serie = new SerieJDBC (idSerie, nombreSerie,  descripcionSerie, idGenero);
+			serie = new SerieJDBC (idSerie, nombreSerie, descripcionSerie, idGenero);
 			
 			return serie;
-			
 			
 		}catch (SQLException sqle) {
 			// En una aplicacion real, escribo en el log y delego
@@ -137,23 +150,23 @@ public class SerieJDBC {
 		return serie = null;
 	}
 	
-	public boolean eliminarSerie (long idSerie) {
+	public boolean eliminarSerie (long idSerie) throws FileNotFoundException, InvalidPropertiesFormatException, IOException {
 		/* Conexion a la Base de Datos */
 		Connection con = null;
 		/* Sentencia sql */
-		Statement stmt = null;
+		PreparedStatement stmt = null;
 		/* Conjunto de Resultados a obtener de la sentencia sql */
 		ResultSet rs = null;
 		
-		String query = "delete from series where idSerie = " + idSerie;
+		
 		
 		try {
 			con = new Utilidades().getConnection();
 			// Creacion de la sentencia
-			stmt = con.createStatement();
-			// Ejecucion de la consulta y obtencion de resultados en un
-			// ResultSet
-			stmt.executeUpdate(query);
+			stmt = con.prepareStatement(DELETE_SERIE);
+			stmt.setLong(1, idSerie);
+			
+			stmt.executeUpdate();
 			
 			return true;
 			
@@ -181,27 +194,27 @@ public class SerieJDBC {
 	}
 	
 	
-	public ArrayList <SerieJDBC> obtenerCatalogoSeries (){
+	public ArrayList <SerieJDBC> obtenerCatalogoSeries () throws FileNotFoundException, InvalidPropertiesFormatException, IOException{
 		
 		/* Conexion a la Base de Datos */
 		Connection con = null;
 		/* Sentencia sql */
-		Statement stmt = null;
+		PreparedStatement stmt = null;
 		/* Conjunto de Resultados a obtener de la sentencia sql */
 		ResultSet rs = null;
+		
 		SerieJDBC serie = null;
-		String query = "SELECT * FROM series";
+		
 		try {
 			con = new Utilidades().getConnection();
 			// Creacion de la sentencia
-			stmt = con.createStatement();
-			// Ejecucion de la consulta y obtencion de resultados en un
-			// ResultSet
-			rs = stmt.executeQuery(query);
+			stmt = con.prepareStatement(SELECT_SERIES);
 			
+			rs = stmt.executeQuery();
 			
 			// Recuperacion de los datos del ResultSet
 			ArrayList <SerieJDBC> listaSeries = new ArrayList<SerieJDBC> ();
+			
 			while (rs.next()) {
 				idSerie = rs.getLong("idSerie");
 				nombreSerie = rs.getString("nombre");
@@ -215,6 +228,7 @@ public class SerieJDBC {
 			
 			return listaSeries;
 			
+			//ESTO ES PARA COMPROBAR SI ESTÁ BIEN HECHO
 			/*for (int i = 0; i < listaSeries.size(); i++) {
 				System.out.println(listaSeries.get(i).toString());
 				System.out.println("-------------------------------------------------------------");
@@ -242,23 +256,21 @@ public class SerieJDBC {
 	}
 	
 
-	public int obtenerNumeroSeries () {
+	public int obtenerNumeroSeries () throws FileNotFoundException, InvalidPropertiesFormatException, IOException {
 		/* Conexion a la Base de Datos */
 		Connection con = null;
 		/* Sentencia sql */
-		Statement stmt = null;
+		PreparedStatement stmt = null;
 		/* Conjunto de Resultados a obtener de la sentencia sql */
 		ResultSet rs = null;
 
-		String query = "SELECT COUNT(idSerie) 'NUMERO' FROM series";
 		try {
 			con = new Utilidades().getConnection();
 			// Creacion de la sentencia
-			stmt = con.createStatement();
+			stmt = con.prepareStatement(CONTAR_SERIES);
 			// Ejecucion de la consulta y obtencion de resultados en un
 			// ResultSet
-			rs = stmt.executeQuery(query);
-			
+			rs = stmt.executeQuery();
 			
 			// Recuperacion de los datos del ResultSet
 			while (rs.next()) {
@@ -289,47 +301,46 @@ public class SerieJDBC {
 		return 0;
 	}
 	
-	/*NO ENTIENDO COMO SACAR LAS SERIES POR NOMBRE, PORQUE NO SE DEBERIAN DE REPETIR LOS NOMBRES DE LAS PELICULAS
-	 * En Todo CASO, SE MOSTRARIAN LAS PELICULAS QUE CONTENGAN LA PALABRA CLAVE INTRODUCIDA. POR EJEMPLO
-	 * SE INTRODUCE JOKER, PUES MOSTRAR JOKER, JOKER 2, JOKER 3
-	 * PREGUNTAR AL PROFESOR... XDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDD
-	 */
-	
-	public ArrayList <SerieJDBC> buscarSeriesPorNombre (String nombre, int index, int count) {
+	public void buscarSeriesPorNombre (String nombre, int index, int limit) throws FileNotFoundException, InvalidPropertiesFormatException, IOException {
 		/* Conexion a la Base de Datos */
 		Connection con = null;
 		/* Sentencia sql */
-		Statement stmt = null;
+		PreparedStatement stmt = null;
 		/* Conjunto de Resultados a obtener de la sentencia sql */
 		ResultSet rs = null;
-
-		String query = "SELECT * FROM series WHERE nombre = '" + nombre + "'";
+		
 		try {
 			con = new Utilidades().getConnection();
 			// Creacion de la sentencia
-			stmt = con.createStatement();
-			// Ejecucion de la consulta y obtencion de resultados en un
-			// ResultSet
-			rs = stmt.executeQuery(query);
+			stmt = con.prepareStatement(SELECT_SERIES_NOMBRE);	
+			stmt.setString (1, '%'+nombre);
+			stmt.setLong(2, index);
+			stmt.setLong(3, limit);
+			
+			rs = stmt.executeQuery();
 			
 			ArrayList <SerieJDBC> listaSeries = new ArrayList <SerieJDBC> ();
 			
 			SerieJDBC serie = null;
 			
-			int contador = 0;
-			
-			while (rs.next() && contador < count) {
+			while (rs.next()) {
 				idSerie = rs.getLong("idSerie");
-				idGenero = rs.getLong("idGenero");
 				nombreSerie = rs.getString("nombre");
 				descripcionSerie = rs.getString("descripcion");
+				idGenero = rs.getLong("idGenero");
 				
 				serie = new SerieJDBC (idSerie, nombreSerie, descripcionSerie, idGenero);
 				
 				listaSeries.add(serie);
 			} 
 			
-			return listaSeries;
+			//ESTO ES PARA COMPROBAR SI ESTÁ BIEN HECHO
+			for (int i = 0; i < listaSeries.size(); i++) {
+				System.out.println(listaSeries.get(i).toString());
+				System.out.println("-------------------------------------------------------------");
+			}
+			
+			//return listaSeries;
 		}catch (SQLException sqle) {
 			// En una aplicacion real, escribo en el log y delego
 			System.err.println(sqle.getMessage());
@@ -350,29 +361,29 @@ public class SerieJDBC {
 				// es error al liberar recursos
 			}
 		}
-		return null;
+		//return null;
 	}
 
 	
-	public ArrayList <SerieJDBC> obtenerSeriesPorGenero (long idGenero, int index, int count) {
+	public ArrayList <SerieJDBC> obtenerSeriesPorGenero (long idGenero, int index, int count) throws FileNotFoundException, InvalidPropertiesFormatException, IOException {
 		
 		/* Conexion a la Base de Datos */
 		Connection con = null;
 		/* Sentencia sql */
-		Statement stmt = null;
+		PreparedStatement stmt = null;
 		/* Conjunto de Resultados a obtener de la sentencia sql */
 		ResultSet rs = null;
-		String query = "SELECT * FROM series WHERE idGenero = " +idGenero;
+		
 		SerieJDBC serie = null;
 		
 		try {
 			con = new Utilidades().getConnection();
-			// Creacion de la sentencia
-			stmt = con.createStatement();
-			// Ejecucion de la consulta y obtencion de resultados en un ResultSet
-			rs = stmt.executeQuery(query);
+			stmt = con.prepareStatement(SELECT_SERIES_GENERO);
+			stmt.setLong(1, idGenero);
+			rs = stmt.executeQuery();
 			
 			ArrayList <SerieJDBC> listaSeries = new ArrayList<SerieJDBC> ();
+			
 			int contador = 0;
 			
 			while (rs.next() && contador < count) {
@@ -411,7 +422,7 @@ public class SerieJDBC {
 		return null;
 	}
 	
-	public SerieJDBC editarSerie (SerieJDBC serie) {
+	public SerieJDBC editarSerie (SerieJDBC serie) throws FileNotFoundException, InvalidPropertiesFormatException, IOException {
 		/* Conexion a la Base de Datos */
 		Connection con = null;
 		/* Sentencia sql */
@@ -423,12 +434,13 @@ public class SerieJDBC {
 			con = new Utilidades().getConnection();
 			// Creacion de la sentencia
 			stmt = con.prepareStatement(UPDATE_SERIE);
-			// Ejecucion de la consulta y obtencion de resultados en un
-			// ResultSet
+			// Ejecucion de la consulta
+			
+			
 			stmt.setString(1, serie.getNombreSerie());
 			stmt.setString(2, serie.getDescripcionSerie());
 			stmt.setLong(3, serie.getIdGenero());
-			stmt.setLong(4, serie.getIdSerie());
+			stmt.setLong(4, serie.getIdGenero());
 			
 			stmt.executeUpdate();
 
@@ -449,9 +461,6 @@ public class SerieJDBC {
 		}
 		return null;
 	}
-	
-	
-	
 	
 	
 	public String toString () {

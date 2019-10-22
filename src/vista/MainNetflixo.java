@@ -10,9 +10,9 @@ public class MainNetflixo {
 	public static void main(String[] args) throws IOException {
 		Scanner sc = new Scanner (System.in);
 		
-		SerieJDBC serie1 = new SerieJDBC ();
+		SerieJDBC serie1 = new SerieJDBC (2, "Nombre Nuevo", "Descripcion nueva", 2);
 		
-		System.out.println(serie1.obtenerSerie(1).toString());
+		serie1.buscarSeriesPorNombre("peli 1", 0, 2);
 	}
 
 }
