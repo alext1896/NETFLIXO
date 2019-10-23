@@ -13,7 +13,7 @@ import java.util.InvalidPropertiesFormatException;
 import utilidades.Utilidades;
 
 
-public class SerieJDBC {
+public class SerieJDBC implements SerieDAO {
 	private long idSerie , idGenero;
 	private String nombreSerie, descripcionSerie;
 	private static final String SELECT_SERIE_IDSERIE = "select * from series where idSerie = ?";
@@ -92,7 +92,7 @@ public class SerieJDBC {
 		}
 			return serie = null;
 	}
-	
+
 	public SerieJDBC crearSerie (String nombreSerie, String descripcionSerie, long idGenero) throws FileNotFoundException, InvalidPropertiesFormatException, IOException {
 
 		Connection con = null;
@@ -104,9 +104,11 @@ public class SerieJDBC {
 		try {
 			con = new Utilidades().getConnection();
 			
-			// Creacion de la sentencia
-			stmt = con.prepareStatement(CREAR_SERIE,
-                               Statement.RETURN_GENERATED_KEYS);
+			stmt = con.prepareStatement(CREAR_SERIE, Statement.RETURN_GENERATED_KEYS);
+			stmt.setString(1 , nombreSerie );
+			stmt.setString(2, descripcionSerie);
+			stmt.setLong(3, idGenero);
+			
 			int affectedRows = stmt.executeUpdate();
 			if (affectedRows == 0) {
 			 throw new SQLException("No se pudo guardar");
@@ -116,12 +118,6 @@ public class SerieJDBC {
 			if (generatedKeys.next()) {
 			  idSerie = generatedKeys.getInt(1);
 			};
-			
-			stmt.setString(1 , nombreSerie );
-			stmt.setString(2, descripcionSerie);
-			stmt.setLong(3, idGenero);
-			// Ejecucion de la consulta y obtencion de resultados en un
-			stmt.executeUpdate();
 			
 			serie = new SerieJDBC (idSerie, nombreSerie, descripcionSerie, idGenero);
 			
@@ -298,10 +294,10 @@ public class SerieJDBC {
 				// es error al liberar recursos
 			}
 		}
-		return 0;
+		return -1;
 	}
 	
-	public void buscarSeriesPorNombre (String nombre, int index, int limit) throws FileNotFoundException, InvalidPropertiesFormatException, IOException {
+	public ArrayList <SerieJDBC> buscarSeriesPorNombre (String nombre, int index, int limit) throws FileNotFoundException, InvalidPropertiesFormatException, IOException {
 		/* Conexion a la Base de Datos */
 		Connection con = null;
 		/* Sentencia sql */
@@ -334,13 +330,7 @@ public class SerieJDBC {
 				listaSeries.add(serie);
 			} 
 			
-			//ESTO ES PARA COMPROBAR SI ESTÁ BIEN HECHO
-			for (int i = 0; i < listaSeries.size(); i++) {
-				System.out.println(listaSeries.get(i).toString());
-				System.out.println("-------------------------------------------------------------");
-			}
-			
-			//return listaSeries;
+			return listaSeries;
 		}catch (SQLException sqle) {
 			// En una aplicacion real, escribo en el log y delego
 			System.err.println(sqle.getMessage());
@@ -361,7 +351,7 @@ public class SerieJDBC {
 				// es error al liberar recursos
 			}
 		}
-		//return null;
+		return null;
 	}
 
 	
@@ -430,8 +420,10 @@ public class SerieJDBC {
 		/* Conjunto de Resultados a obtener de la sentencia sql */
 		
 		
+		
 		try {
 			con = new Utilidades().getConnection();
+			
 			// Creacion de la sentencia
 			stmt = con.prepareStatement(UPDATE_SERIE);
 			// Ejecucion de la consulta
@@ -440,9 +432,12 @@ public class SerieJDBC {
 			stmt.setString(1, serie.getNombreSerie());
 			stmt.setString(2, serie.getDescripcionSerie());
 			stmt.setLong(3, serie.getIdGenero());
-			stmt.setLong(4, serie.getIdGenero());
+			stmt.setLong(4, serie.getIdSerie());
 			
 			stmt.executeUpdate();
+			
+			serie = new SerieJDBC (serie.getIdSerie(), serie.getNombreSerie(), serie.getDescripcionSerie(), serie.getIdGenero());
+			
 
 		}catch (SQLException sqle) {
 			// En una aplicacion real, escribo en el log y delego
@@ -462,9 +457,8 @@ public class SerieJDBC {
 		return null;
 	}
 	
-	
 	public String toString () {
-		String toString = "\n IdSerie: " + idSerie + "\n Nombre: " + nombreSerie + "\n Descripcion: " + descripcionSerie + "\n idGenero: " + idGenero;
+		String toString = "\n ID Serie: " + idSerie + "\n Nombre: " + nombreSerie + "\n Descripcion: " + descripcionSerie + "\n idGenero: " + idGenero;
 		
 		return toString;
 	}
