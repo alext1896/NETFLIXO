@@ -13,36 +13,26 @@ import java.util.InvalidPropertiesFormatException;
 import utilidades.Utilidades;
 
 public class GeneroJDBC implements GeneroDAO {
+	
 	private long idGenero;
-	private String nombreGenero;
+	private String nombreGenero, descripcionGenero;
 	
 	private static final String SELECT_GENERO_IDGENERO = "select * from genero where idGenero = ?";
-	private static final String CREAR_GENERO = "insert into genero (nombreGenero) values (?)";
-	private static final String UPDATE_GENERO = "update genero set nombreGenero = ? where idGenero = ?";
+	private static final String CREAR_GENERO = "insert into genero (nombreGenero, descripcionGenero) values (?, ?)";
+	private static final String UPDATE_GENERO = "update genero set nombreGenero = ?, descripcionGenero = ? where idGenero = ?";
 	private static final String SELECT_GENEROS = "select * from genero";
 	private static final String DELETE_GENERO = "delete from genero where idGenero = ?";
 
-	
-	//CONSTRUCTORES
-	public GeneroJDBC (long idGenero, String nombreGenero) {
-		this.idGenero = idGenero;
-		this.nombreGenero = nombreGenero;
-	}
-	
-	public GeneroJDBC () {
-		
-	}
-	
+	Genero genero = null;
 	//MÉTODOS
 	
-	public GeneroJDBC obtenerGenero (long idGenero) throws IOException {
+	public Genero obtenerGenero (long idGenero) throws IOException {
 		/* Conexion a la Base de Datos */
 		Connection con = null;
 		/* Sentencia sql */
 		PreparedStatement stmt = null;
 		/* Conjunto de Resultados a obtener de la sentencia sql */
 		ResultSet rs = null;
-		GeneroJDBC genero = null;
 		
 		
 		try {
@@ -59,8 +49,9 @@ public class GeneroJDBC implements GeneroDAO {
 			while (rs.next() == true) {
 				idGenero = rs.getLong("idGenero");
 				nombreGenero = rs.getString("nombreGenero");
+				descripcionGenero = rs.getString("descripcionGanero");
 				
-				genero = new GeneroJDBC (idGenero, nombreGenero);
+				genero = new Genero (idGenero, nombreGenero, descripcionGenero);
 			} 
 			
 			return genero;
@@ -88,7 +79,7 @@ public class GeneroJDBC implements GeneroDAO {
 			return null;
 	}
 	
-	public GeneroJDBC editarGenero (GeneroJDBC generoPelicula) throws FileNotFoundException, InvalidPropertiesFormatException, IOException {
+	public Genero editarGenero (Genero generoPelicula) throws FileNotFoundException, InvalidPropertiesFormatException, IOException {
 		/* Conexion a la Base de Datos */
 		Connection con = null;
 		/* Sentencia sql */
@@ -103,10 +94,12 @@ public class GeneroJDBC implements GeneroDAO {
 			// Ejecucion de la consulta
 			
 			stmt.setString(1, generoPelicula.getNombreGenero());
-			stmt.setLong(2, generoPelicula.getIdGenero());
+			stmt.setString(2, generoPelicula.getDescripcionGenero());
+			stmt.setLong(3, generoPelicula.getIdGenero());
+			
 			stmt.executeUpdate();
 			
-			GeneroJDBC genero = new GeneroJDBC (generoPelicula.getIdGenero(), generoPelicula.getNombreGenero());
+			genero = new Genero (generoPelicula.getIdGenero(), generoPelicula.getNombreGenero(), generoPelicula.getDescripcionGenero());
 			
 			return genero;
 
@@ -128,7 +121,7 @@ public class GeneroJDBC implements GeneroDAO {
 		return null;
 	}
 	
-	public ArrayList<GeneroJDBC> obtenerGeneros () throws FileNotFoundException, InvalidPropertiesFormatException, IOException {
+	public ArrayList<Genero> obtenerGeneros () throws FileNotFoundException, InvalidPropertiesFormatException, IOException {
 
 		/* Conexion a la Base de Datos */
 		Connection con = null;
@@ -136,8 +129,6 @@ public class GeneroJDBC implements GeneroDAO {
 		PreparedStatement stmt = null;
 		/* Conjunto de Resultados a obtener de la sentencia sql */
 		ResultSet rs = null;
-		
-		GeneroJDBC genero = null;
 		
 		try {
 			con = new Utilidades().getConnection();
@@ -147,20 +138,21 @@ public class GeneroJDBC implements GeneroDAO {
 			rs = stmt.executeQuery();
 			
 			// Recuperacion de los datos del ResultSet
-			ArrayList <GeneroJDBC> listaGeneros = new ArrayList<GeneroJDBC> ();
+			ArrayList <Genero> listaGeneros = new ArrayList<Genero> ();
 			
 			while (rs.next()) {
 				idGenero = rs.getLong("idGenero");
 				nombreGenero = rs.getString("nombreGenero");
+				descripcionGenero = rs.getString("descripcionGenero");
 				
-				genero = new GeneroJDBC (idGenero, nombreGenero);
+				genero = new Genero (idGenero, nombreGenero, descripcionGenero);
 				
 				listaGeneros.add(genero);
 			} 
 			
 			return listaGeneros;
 			
-			//ESTO ES PARA COMPROBAR SI ESTÁ BIEN HECHO
+			//ESTO ES PARA COMPROBAR SI LOS IMPRIME
 			/*for (int i = 0; i < listaGeneros.size(); i++) {
 				System.out.println(listaGeneros.get(i).toString());
 				System.out.println("-------------------------------------------------------------");
@@ -189,7 +181,7 @@ public class GeneroJDBC implements GeneroDAO {
 		
 	}
 	
-	public GeneroJDBC crearGenero (String nombreGenero) throws FileNotFoundException, InvalidPropertiesFormatException, IOException {
+	public Genero crearGenero (String nombreGenero, String descripcionGenero) throws FileNotFoundException, InvalidPropertiesFormatException, IOException {
 		Connection con = null;
 		ResultSet rs = null;
 		PreparedStatement stmt = null;
@@ -200,6 +192,7 @@ public class GeneroJDBC implements GeneroDAO {
 			
 			stmt = con.prepareStatement(CREAR_GENERO, Statement.RETURN_GENERATED_KEYS);
 			stmt.setString(1 , nombreGenero );
+			stmt.setString(2, descripcionGenero);
 			
 			int affectedRows = stmt.executeUpdate();
 			if (affectedRows == 0) {
@@ -211,7 +204,7 @@ public class GeneroJDBC implements GeneroDAO {
 			  idGenero = generatedKeys.getInt(1);
 			};
 			
-			GeneroJDBC genero = new GeneroJDBC (idGenero, nombreGenero);
+			genero = new Genero (idGenero, nombreGenero, descripcionGenero);
 			
 			return genero;
 			
@@ -279,51 +272,5 @@ public class GeneroJDBC implements GeneroDAO {
 		return false;
 	}
 	
-	public String toString () {
-		
-		String toString = "\n ID Genero: " + idGenero + "\n Genero: " + nombreGenero;
-		
-		return toString;
-	}
-	public long getIdGenero () {
-		return idGenero;
-		
-	}
 	
-	public String getNombreGenero () {
-		return nombreGenero;
-		
-	}
-	
-	public void setNombreGenero (String nombreGenero) {
-		this.nombreGenero = nombreGenero;
-		
-	}
 }
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-

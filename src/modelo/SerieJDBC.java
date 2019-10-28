@@ -14,39 +14,28 @@ import utilidades.Utilidades;
 
 
 public class SerieJDBC implements SerieDAO {
-	private long idSerie , idGenero;
-	private String nombreSerie, descripcionSerie;
+	private long idSerie, idGenero;
+	private String nombreSerie, descripcionSerie; 
 	private static final String SELECT_SERIE_IDSERIE = "select * from series where idSerie = ?";
-	private static final String CREAR_SERIE = "insert into series (nombre, descripcion, idgenero) values (?, ?, ?)";
-	private static final String UPDATE_SERIE = "update series set nombre = ?, descripcion = ?, idGenero = ? where idSerie = ?";
+	private static final String CREAR_SERIE = "insert into series (nombreSerie, descripcionSerie, idGenero) values (?, ?, ?)";
+	private static final String UPDATE_SERIE = "update series set nombreSerie = ?, descripcionSerie = ?, idGenero = ? where idSerie = ?";
 	private static final String DELETE_SERIE = "delete from series where idSerie = ?";
 	private static final String SELECT_SERIES = "select * from series";
 	private static final String CONTAR_SERIES = "select count(idSerie) 'numero' from series";
 	private static final String SELECT_SERIES_GENERO = "select * from series where idGenero = ?";
-	private static final String SELECT_SERIES_NOMBRE = "select * from series where nombre like ? limit ?, ?";
-	
-	//CONSTRUCTORES
-	public SerieJDBC(long idSerie, String nombreSerie, String descripcionSerie, long idGenero) {
-		this.idSerie = idSerie;
-		this.nombreSerie = nombreSerie;
-		this.descripcionSerie = descripcionSerie;
-		this.idGenero = idGenero;
-	}
-	public SerieJDBC() {
+	private static final String SELECT_SERIES_NOMBRE = "select * from series where nombreSerie like ? limit ?, ?";
 
-	}
+	Serie serie = null;
 	
 	//MÉTODOS
 
-	public SerieJDBC obtenerSerie (long idSerie) throws IOException {
+	public Serie obtenerSerie (long idSerie) throws IOException {
 		/* Conexion a la Base de Datos */
 		Connection con = null;
 		/* Sentencia sql */
 		PreparedStatement stmt = null;
 		/* Conjunto de Resultados a obtener de la sentencia sql */
 		ResultSet rs = null;
-		SerieJDBC serie = null;
-		
 		
 		try {
 			con = new Utilidades().getConnection();
@@ -61,11 +50,11 @@ public class SerieJDBC implements SerieDAO {
 			// Recuperacion de los datos del ResultSet
 			while (rs.next() == true) {
 				idSerie = rs.getLong("idSerie");
-				nombreSerie = rs.getString("nombre");
-				descripcionSerie = rs.getString("descripcion");
-				idGenero = rs.getLong("idgenero");
+				nombreSerie = rs.getString("nombreSerie");
+				descripcionSerie = rs.getString("descripcionSerie");
+				idGenero = rs.getLong("idGenero");
 				
-				serie = new SerieJDBC (idSerie, nombreSerie, descripcionSerie, idGenero);
+				serie = new Serie (idSerie, nombreSerie, descripcionSerie, idGenero);
 			} 
 			
 			return serie;
@@ -90,16 +79,15 @@ public class SerieJDBC implements SerieDAO {
 				// es error al liberar recursos
 			}
 		}
-			return serie = null;
+			return null;
 	}
 
-	public SerieJDBC crearSerie (String nombreSerie, String descripcionSerie, long idGenero) throws FileNotFoundException, InvalidPropertiesFormatException, IOException {
+	public Serie crearSerie (String nombreSerie, String descripcionSerie, long idGenero) throws FileNotFoundException, InvalidPropertiesFormatException, IOException {
 
 		Connection con = null;
 		
 		ResultSet rs = null;
 		PreparedStatement stmt = null;
-		SerieJDBC serie = null;
 		
 		try {
 			con = new Utilidades().getConnection();
@@ -119,7 +107,7 @@ public class SerieJDBC implements SerieDAO {
 			  idSerie = generatedKeys.getInt(1);
 			};
 			
-			serie = new SerieJDBC (idSerie, nombreSerie, descripcionSerie, idGenero);
+			serie = new Serie (idSerie, nombreSerie, descripcionSerie, idGenero);
 			
 			return serie;
 			
@@ -190,7 +178,7 @@ public class SerieJDBC implements SerieDAO {
 	}
 	
 	
-	public ArrayList <SerieJDBC> obtenerCatalogoSeries () throws FileNotFoundException, InvalidPropertiesFormatException, IOException{
+	public ArrayList <Serie> obtenerCatalogoSeries () throws FileNotFoundException, InvalidPropertiesFormatException, IOException{
 		
 		/* Conexion a la Base de Datos */
 		Connection con = null;
@@ -198,8 +186,6 @@ public class SerieJDBC implements SerieDAO {
 		PreparedStatement stmt = null;
 		/* Conjunto de Resultados a obtener de la sentencia sql */
 		ResultSet rs = null;
-		
-		SerieJDBC serie = null;
 		
 		try {
 			con = new Utilidades().getConnection();
@@ -209,26 +195,21 @@ public class SerieJDBC implements SerieDAO {
 			rs = stmt.executeQuery();
 			
 			// Recuperacion de los datos del ResultSet
-			ArrayList <SerieJDBC> listaSeries = new ArrayList<SerieJDBC> ();
+			ArrayList <Serie> listaSeries = new ArrayList<Serie> ();
 			
 			while (rs.next()) {
 				idSerie = rs.getLong("idSerie");
-				nombreSerie = rs.getString("nombre");
-				descripcionSerie = rs.getString("descripcion");
-				idGenero = rs.getLong("idgenero");
+				nombreSerie = rs.getString("nombreSerie");
+				descripcionSerie = rs.getString("descripcionSerie");
+				idGenero = rs.getLong("idGenero");
 				
-				serie = new SerieJDBC (idSerie, nombreSerie, descripcionSerie, idGenero);
+				serie = new Serie (idSerie, nombreSerie, descripcionSerie, idGenero);
 				
 				listaSeries.add(serie);
 			} 
 			
 			return listaSeries;
 			
-			//ESTO ES PARA COMPROBAR SI ESTÁ BIEN HECHO
-			/*for (int i = 0; i < listaSeries.size(); i++) {
-				System.out.println(listaSeries.get(i).toString());
-				System.out.println("-------------------------------------------------------------");
-			}*/
 		}catch (SQLException sqle) {
 			// En una aplicacion real, escribo en el log y delego
 			System.err.println(sqle.getMessage());
@@ -297,7 +278,7 @@ public class SerieJDBC implements SerieDAO {
 		return -1;
 	}
 	
-	public ArrayList <SerieJDBC> buscarSeriesPorNombre (String nombre, int index, int limit) throws FileNotFoundException, InvalidPropertiesFormatException, IOException {
+	public ArrayList <Serie> buscarSeriesPorNombre (String nombre, int index, int limit) throws FileNotFoundException, InvalidPropertiesFormatException, IOException {
 		/* Conexion a la Base de Datos */
 		Connection con = null;
 		/* Sentencia sql */
@@ -309,23 +290,23 @@ public class SerieJDBC implements SerieDAO {
 			con = new Utilidades().getConnection();
 			// Creacion de la sentencia
 			stmt = con.prepareStatement(SELECT_SERIES_NOMBRE);	
-			stmt.setString (1, '%'+nombre);
+			stmt.setString (1, nombre + '%');
 			stmt.setLong(2, index);
 			stmt.setLong(3, limit);
 			
 			rs = stmt.executeQuery();
 			
-			ArrayList <SerieJDBC> listaSeries = new ArrayList <SerieJDBC> ();
+			ArrayList <Serie> listaSeries = new ArrayList <Serie> ();
 			
-			SerieJDBC serie = null;
+			
 			
 			while (rs.next()) {
 				idSerie = rs.getLong("idSerie");
-				nombreSerie = rs.getString("nombre");
-				descripcionSerie = rs.getString("descripcion");
+				nombreSerie = rs.getString("nombreSerie");
+				descripcionSerie = rs.getString("descripcionSerie");
 				idGenero = rs.getLong("idGenero");
 				
-				serie = new SerieJDBC (idSerie, nombreSerie, descripcionSerie, idGenero);
+				serie = new Serie (idSerie, nombreSerie, descripcionSerie, idGenero);
 				
 				listaSeries.add(serie);
 			} 
@@ -355,7 +336,7 @@ public class SerieJDBC implements SerieDAO {
 	}
 
 	
-	public ArrayList <SerieJDBC> obtenerSeriesPorGenero (long idGenero, int index, int count) throws FileNotFoundException, InvalidPropertiesFormatException, IOException {
+	public ArrayList <Serie> obtenerSeriesPorGenero (long idGenero, int index, int count) throws FileNotFoundException, InvalidPropertiesFormatException, IOException {
 		
 		/* Conexion a la Base de Datos */
 		Connection con = null;
@@ -364,25 +345,23 @@ public class SerieJDBC implements SerieDAO {
 		/* Conjunto de Resultados a obtener de la sentencia sql */
 		ResultSet rs = null;
 		
-		SerieJDBC serie = null;
-		
 		try {
 			con = new Utilidades().getConnection();
 			stmt = con.prepareStatement(SELECT_SERIES_GENERO);
 			stmt.setLong(1, idGenero);
 			rs = stmt.executeQuery();
 			
-			ArrayList <SerieJDBC> listaSeries = new ArrayList<SerieJDBC> ();
+			ArrayList <Serie> listaSeries = new ArrayList<Serie> ();
 			
 			int contador = 0;
 			
 			while (rs.next() && contador < count) {
 				idSerie = rs.getLong("idSerie");
-				nombreSerie = rs.getString("nombre");
-				descripcionSerie = rs.getString("descripcion");
-				idGenero = rs.getLong("idgenero");
+				nombreSerie = rs.getString("nombreSerie");
+				descripcionSerie = rs.getString("descripcionSerie");
+				idGenero = rs.getLong("idGenero");
 				
-				serie = new SerieJDBC (idSerie, nombreSerie, descripcionSerie, idGenero);
+				serie = new Serie (idSerie, nombreSerie, descripcionSerie, idGenero);
 				
 				listaSeries.add(serie);
 				contador ++;
@@ -412,23 +391,20 @@ public class SerieJDBC implements SerieDAO {
 		return null;
 	}
 	
-	public SerieJDBC editarSerie (SerieJDBC serie) throws FileNotFoundException, InvalidPropertiesFormatException, IOException {
+	public Serie editarSerie (Serie serie) throws FileNotFoundException, InvalidPropertiesFormatException, IOException {
 		/* Conexion a la Base de Datos */
 		Connection con = null;
 		/* Sentencia sql */
 		PreparedStatement stmt = null;
 		/* Conjunto de Resultados a obtener de la sentencia sql */
 		
-		
-		
 		try {
 			con = new Utilidades().getConnection();
 			
 			// Creacion de la sentencia
 			stmt = con.prepareStatement(UPDATE_SERIE);
+			
 			// Ejecucion de la consulta
-			
-			
 			stmt.setString(1, serie.getNombreSerie());
 			stmt.setString(2, serie.getDescripcionSerie());
 			stmt.setLong(3, serie.getIdGenero());
@@ -436,7 +412,7 @@ public class SerieJDBC implements SerieDAO {
 			
 			stmt.executeUpdate();
 			
-			serie = new SerieJDBC (serie.getIdSerie(), serie.getNombreSerie(), serie.getDescripcionSerie(), serie.getIdGenero());
+			serie = new Serie (serie.getIdSerie(), serie.getNombreSerie(), serie.getDescripcionSerie(), serie.getIdGenero());
 			
 
 		}catch (SQLException sqle) {
@@ -457,30 +433,9 @@ public class SerieJDBC implements SerieDAO {
 		return null;
 	}
 	
-	public String toString () {
-		String toString = "\n ID Serie: " + idSerie + "\n Nombre: " + nombreSerie + "\n Descripcion: " + descripcionSerie + "\n idGenero: " + idGenero;
-		
-		return toString;
-	}
-	
-	public long getIdSerie () {
-		return idSerie;
-	}
-	
-	public long getIdGenero () {
-		return idGenero;
-	}
-	
-	public String getNombreSerie () {
-		return nombreSerie;
-	}
-	
-	public String getDescripcionSerie () {
-		return descripcionSerie;
-	}
 	
 
-	
 
+	
 }
 
