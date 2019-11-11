@@ -4,6 +4,7 @@ import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.InvalidPropertiesFormatException;
+import java.util.List;
 
 public interface GeneroDAO {
 	
@@ -11,7 +12,7 @@ public interface GeneroDAO {
 	
 	public Genero editarGenero (Genero generoPelicula) throws FileNotFoundException, InvalidPropertiesFormatException, IOException;
 	
-	public ArrayList<Genero> obtenerGeneros () throws FileNotFoundException, InvalidPropertiesFormatException, IOException;
+	public List<Genero> obtenerGeneros () throws FileNotFoundException, InvalidPropertiesFormatException, IOException;
 	
 	public Genero crearGenero (String nombreGenero, String descripcionGenero) throws FileNotFoundException, InvalidPropertiesFormatException, IOException;
 	

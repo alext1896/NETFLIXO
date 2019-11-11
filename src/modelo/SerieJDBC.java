@@ -9,6 +9,7 @@ import java.sql.SQLException;
 import java.sql.Statement;
 import java.util.ArrayList;
 import java.util.InvalidPropertiesFormatException;
+import java.util.List;
 
 import utilidades.Utilidades;
 
@@ -178,7 +179,7 @@ public class SerieJDBC implements SerieDAO {
 	}
 	
 	
-	public ArrayList <Serie> obtenerCatalogoSeries () throws FileNotFoundException, InvalidPropertiesFormatException, IOException{
+	public List <Serie> obtenerCatalogoSeries () throws FileNotFoundException, InvalidPropertiesFormatException, IOException{
 		
 		/* Conexion a la Base de Datos */
 		Connection con = null;
@@ -195,7 +196,7 @@ public class SerieJDBC implements SerieDAO {
 			rs = stmt.executeQuery();
 			
 			// Recuperacion de los datos del ResultSet
-			ArrayList <Serie> listaSeries = new ArrayList<Serie> ();
+			List <Serie> listaSeries = new ArrayList<Serie> ();
 			
 			while (rs.next()) {
 				idSerie = rs.getLong("idSerie");
@@ -278,7 +279,7 @@ public class SerieJDBC implements SerieDAO {
 		return -1;
 	}
 	
-	public ArrayList <Serie> buscarSeriesPorNombre (String nombre, int index, int limit) throws FileNotFoundException, InvalidPropertiesFormatException, IOException {
+	public List <Serie> buscarSeriesPorNombre (String nombre, int index, int limit) throws FileNotFoundException, InvalidPropertiesFormatException, IOException {
 		/* Conexion a la Base de Datos */
 		Connection con = null;
 		/* Sentencia sql */
@@ -296,7 +297,7 @@ public class SerieJDBC implements SerieDAO {
 			
 			rs = stmt.executeQuery();
 			
-			ArrayList <Serie> listaSeries = new ArrayList <Serie> ();
+			List <Serie> listaSeries = new ArrayList <Serie> ();
 			
 			
 			
@@ -336,7 +337,7 @@ public class SerieJDBC implements SerieDAO {
 	}
 
 	
-	public ArrayList <Serie> obtenerSeriesPorGenero (long idGenero, int index, int count) throws FileNotFoundException, InvalidPropertiesFormatException, IOException {
+	public List <Serie> obtenerSeriesPorGenero (long idGenero, int index, int count) throws FileNotFoundException, InvalidPropertiesFormatException, IOException {
 		
 		/* Conexion a la Base de Datos */
 		Connection con = null;
@@ -351,7 +352,7 @@ public class SerieJDBC implements SerieDAO {
 			stmt.setLong(1, idGenero);
 			rs = stmt.executeQuery();
 			
-			ArrayList <Serie> listaSeries = new ArrayList<Serie> ();
+			List <Serie> listaSeries = new ArrayList<Serie> ();
 			
 			int contador = 0;
 			

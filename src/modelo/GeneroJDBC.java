@@ -9,6 +9,7 @@ import java.sql.SQLException;
 import java.sql.Statement;
 import java.util.ArrayList;
 import java.util.InvalidPropertiesFormatException;
+import java.util.List;
 
 import utilidades.Utilidades;
 
@@ -58,6 +59,7 @@ public class GeneroJDBC implements GeneroDAO {
 			
 		} catch (SQLException sqle) {
 			// En una aplicacion real, escribo en el log y delego
+			System.out.println("Ha habido un error de sql");
 			System.err.println(sqle.getMessage());
 		} finally {
 			try {
@@ -105,7 +107,10 @@ public class GeneroJDBC implements GeneroDAO {
 
 		}catch (SQLException sqle) {
 			// En una aplicacion real, escribo en el log y delego
+			System.out.println("Ha habido un error de sql");
+
 			System.err.println(sqle.getMessage());
+			
 		} finally {
 			try {
 				if (stmt != null) {
@@ -115,13 +120,15 @@ public class GeneroJDBC implements GeneroDAO {
 					Utilidades.closeConnection(con);
 				}
 			} catch (SQLException sqle) {
+				System.out.println("Ha habido un error de sql");
+
 				// En una aplicacon real, escribo en el log, no delego porque es error al liberar recursos
 			}
 		}
 		return null;
 	}
 	
-	public ArrayList<Genero> obtenerGeneros () throws FileNotFoundException, InvalidPropertiesFormatException, IOException {
+	public List<Genero> obtenerGeneros () throws FileNotFoundException, InvalidPropertiesFormatException, IOException {
 
 		/* Conexion a la Base de Datos */
 		Connection con = null;
@@ -138,7 +145,7 @@ public class GeneroJDBC implements GeneroDAO {
 			rs = stmt.executeQuery();
 			
 			// Recuperacion de los datos del ResultSet
-			ArrayList <Genero> listaGeneros = new ArrayList<Genero> ();
+			List <Genero> listaGeneros = new ArrayList<Genero> ();
 			
 			while (rs.next()) {
 				idGenero = rs.getLong("idGenero");
@@ -151,13 +158,9 @@ public class GeneroJDBC implements GeneroDAO {
 			} 
 			
 			return listaGeneros;
-			
-			//ESTO ES PARA COMPROBAR SI LOS IMPRIME
-			/*for (int i = 0; i < listaGeneros.size(); i++) {
-				System.out.println(listaGeneros.get(i).toString());
-				System.out.println("-------------------------------------------------------------");
-			}*/
+
 		}catch (SQLException sqle) {
+			System.out.println("Ha habido un error de sql");
 
 			System.err.println(sqle.getMessage());
 		} finally {
@@ -172,7 +175,9 @@ public class GeneroJDBC implements GeneroDAO {
 				if (con != null) {
 					Utilidades.closeConnection(con);
 				}
-			} catch (SQLException sqle) {
+			} catch (SQLException sqle) {			
+				System.out.println("Ha habido un error de sql");
+
 				// En una aplicacon real, escribo en el log, no delego porque es error al liberar recursos
 			}
 		}
@@ -209,6 +214,8 @@ public class GeneroJDBC implements GeneroDAO {
 			return genero;
 			
 		}catch (SQLException sqle) {
+			System.out.println("Ha habido un error de sql");
+
 			// En una aplicacion real, escribo en el log y delego
 			System.err.println(sqle.getMessage());
 		} finally {
@@ -250,6 +257,8 @@ public class GeneroJDBC implements GeneroDAO {
 			return true;
 			
 		}catch (SQLException sqle) {
+			System.out.println("Ha habido un error de sql");
+
 			// En una aplicacion real, escribo en el log y delego
 			System.err.println(sqle.getMessage());
 		} finally {

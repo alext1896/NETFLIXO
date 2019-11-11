@@ -2,8 +2,8 @@ package controlador;
 
 import java.io.FileNotFoundException;
 import java.io.IOException;
-import java.util.ArrayList;
 import java.util.InvalidPropertiesFormatException;
+import java.util.List;
 
 import modelo.Genero;
 import modelo.GeneroDAO;
@@ -30,7 +30,7 @@ public class LifterController {
 		return serieControlador.eliminarSerie(idSerie);
 	};
 	
-	public ArrayList<Serie> obtenerCatalogoSeries () throws FileNotFoundException, InvalidPropertiesFormatException, IOException{
+	public List<Serie> obtenerCatalogoSeries () throws FileNotFoundException, InvalidPropertiesFormatException, IOException{
 		return serieControlador.obtenerCatalogoSeries();
 		
 	};
@@ -39,12 +39,12 @@ public class LifterController {
 		return serieControlador.obtenerNumeroSeries();
 	};
 	
-	public ArrayList<Serie> buscarSeriesPorNombre (String nombre, int index, int limit) throws FileNotFoundException, InvalidPropertiesFormatException, IOException{
+	public List<Serie> buscarSeriesPorNombre (String nombre, int index, int limit) throws FileNotFoundException, InvalidPropertiesFormatException, IOException{
 		return serieControlador.buscarSeriesPorNombre(nombre, index, limit);
 		
 	};
 	
-	public ArrayList<Serie> obtenerSeriesPorGenero (long idGenero, int index, int count) throws FileNotFoundException, InvalidPropertiesFormatException, IOException{
+	public List<Serie> obtenerSeriesPorGenero (long idGenero, int index, int count) throws FileNotFoundException, InvalidPropertiesFormatException, IOException{
 		return serieControlador.obtenerSeriesPorGenero(idGenero, index, count);
 	};
 	
@@ -61,7 +61,7 @@ public class LifterController {
 		return generoControlador.editarGenero(generoPelicula);
 	};
 	
-	public ArrayList<Genero> obtenerGeneros () throws FileNotFoundException, InvalidPropertiesFormatException, IOException{
+	public List<Genero> obtenerGeneros () throws FileNotFoundException, InvalidPropertiesFormatException, IOException{
 		return generoControlador.obtenerGeneros();
 	};
 	

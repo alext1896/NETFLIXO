@@ -36,7 +36,7 @@ public class Genero {
 	}
 	
 	public void setDescriocionGenero (String nombreGenero) {
-		this.descripcionGenero = descripcionGenero;
+		this.descripcionGenero = nombreGenero;
 		
 	}
 	
