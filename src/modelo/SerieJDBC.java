@@ -25,6 +25,8 @@ public class SerieJDBC implements SerieDAO {
 	private static final String CONTAR_SERIES = "select count(idSerie) 'numero' from series";
 	private static final String SELECT_SERIES_GENERO = "select * from series where idGenero = ?";
 	private static final String SELECT_SERIES_NOMBRE = "select * from series where nombreSerie like ? limit ?, ?";
+	private static final String SELECT_SERIES_NOMBRE_GENERO = "select * from series where nombreSerie like ? and idGenero = ? limit ?, ?";
+
 
 	Serie serie = null;
 	
@@ -391,6 +393,65 @@ public class SerieJDBC implements SerieDAO {
 		}
 		return null;
 	}
+	
+	public List <Serie> buscarSeriesPorNombreYGenero (String nombre, Genero genero, int index, int limit) throws FileNotFoundException, InvalidPropertiesFormatException, IOException {
+		/* Conexion a la Base de Datos */
+		Connection con = null;
+		/* Sentencia sql */
+		PreparedStatement stmt = null;
+		/* Conjunto de Resultados a obtener de la sentencia sql */
+		ResultSet rs = null;
+		
+		try {
+			con = new Utilidades().getConnection();
+			// Creacion de la sentencia
+			stmt = con.prepareStatement(SELECT_SERIES_NOMBRE_GENERO);	
+			stmt.setString (1, nombre + '%');
+			stmt.setLong(2, genero.getIdGenero());
+			stmt.setLong(3, index);
+			stmt.setLong(4, limit);
+			
+			rs = stmt.executeQuery();
+			
+			List <Serie> listaSeries = new ArrayList <Serie> ();
+			
+			
+			
+			while (rs.next()) {
+				idSerie = rs.getLong("idSerie");
+				nombreSerie = rs.getString("nombreSerie");
+				descripcionSerie = rs.getString("descripcionSerie");
+				idGenero = rs.getLong("idGenero");
+				
+				serie = new Serie (idSerie, nombreSerie, descripcionSerie, idGenero);
+				
+				listaSeries.add(serie);
+			} 
+			
+			return listaSeries;
+		}catch (SQLException sqle) {
+			// En una aplicacion real, escribo en el log y delego
+			System.err.println(sqle.getMessage());
+		} finally {
+			try {
+				// Liberamos todos los recursos pase lo que pase
+				if (rs != null) {
+					rs.close();
+				}
+				if (stmt != null) {
+					stmt.close();
+				}
+				if (con != null) {
+					Utilidades.closeConnection(con);
+				}
+			} catch (SQLException sqle) {
+				// En una aplicacon real, escribo en el log, no delego porque
+				// es error al liberar recursos
+			}
+		}
+		return null;
+	}
+
 	
 	public Serie editarSerie (Serie serie) throws FileNotFoundException, InvalidPropertiesFormatException, IOException {
 		/* Conexion a la Base de Datos */
