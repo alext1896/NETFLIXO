@@ -19,7 +19,6 @@ public class Utilidades {
 	public String password;
 	public String urlString;
 
-	private String driver;
 	private String serverName;
 	private int portNumber;
 	private Properties prop;
@@ -44,7 +43,7 @@ public class Utilidades {
 		prop.loadFromXML(Files.newInputStream(Paths.get(fileName)));
 
 		this.dbms = this.prop.getProperty("dbms");
-		this.driver = this.prop.getProperty("driver");
+//		this.driver = this.prop.getProperty("driver");
 		this.dbName = this.prop.getProperty("database_name");
 		this.testDbName = this.prop.getProperty("test_database_name");
 		this.test_mode = this.prop.getProperty("test_mode");
